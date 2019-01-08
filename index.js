@@ -1,5 +1,5 @@
-const getKoaListeners = require('./libs/listener/koa')
-const getContainer = require('./libs/cluster').getContainerCluster
+const getKoaListeners = require('./lib/listener/koa')
+const getContainer = require('./lib/cluster').getContainerCluster
 
 module.exports = {
     getKoaListeners,
