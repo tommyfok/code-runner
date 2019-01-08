@@ -3,8 +3,7 @@
 ## usage
 
 ```javascript
-let ctx
-let Runner = require('code-runner')
+const Runner = require('code-runner')
 let containers = Runner.createContainers({
     max: 50 // 最大50个进程，自动调度
 })
