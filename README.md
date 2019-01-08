@@ -4,7 +4,7 @@
 
 ```javascript
 const Runner = require('code-runner')
-let containers = Runner.createContainers({
+let container = Runner.getContainer({
     max: 50 // 最大50个进程，自动调度
 })
 
@@ -27,7 +27,7 @@ let customListeners = {
 }
 
 // run is an async function
-containers.run({
+container.run({
     code: 'your code',
     contextData,
     listeners: {
