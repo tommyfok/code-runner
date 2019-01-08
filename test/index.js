@@ -1,14 +1,27 @@
-const Runner = require('../index')
+const Runner = require('../index.js')
+
 let container = Runner.getContainer({
-    count: 1
+    count: 2
 })
 
-let contextData = {
-    myData: 123
+// run is an async function
+for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+        container.run({
+            code: `console.log(myData)`,
+            context: {
+                myData: i
+            }
+        })
+        container.run({
+            code: `console.log(2)`,
+            context: {
+                myData: i
+            }
+        })
+    }, (i + 1) * 1000)
 }
 
-// run is an async function
 container.run({
-    code: 'console.log(myData)',
-    context: contextData
+    code: 'var i = 0;while(true){i++}'
 })
