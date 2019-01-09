@@ -1,0 +1,28 @@
+{
+  "name": "jscode-runner",
+  "version": "0.0.1",
+  "description": "WORK IN PROGRESS: run javascript code in several lines of code, each code runs in a process, auto load-balanced...",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tommyfok/code-runner.git"
+  },
+  "keywords": [
+    "javascript",
+    "code",
+    "runner"
+  ],
+  "author": "tommyfok",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tommyfok/code-runner/issues"
+  },
+  "homepage": "https://github.com/tommyfok/code-runner#readme"
+}
