@@ -7,18 +7,20 @@ let container = Runner.getContainer({
 // run is an async function
 for (let i = 0; i < 15; i++) {
     setTimeout(() => {
-        container.run({
+        let runResult1 = container.run({
             code: `console.log(myData)`,
             context: {
                 myData: i
             }
         })
-        container.run({
+        console.log('runResult1', runResult1.message)
+        let runResult2 = container.run({
             code: `console.log(2)`,
             context: {
                 myData: i
             }
         })
+        console.log('runResult2', runResult2.message)
     }, (i + 1) * 1000)
 }
 
