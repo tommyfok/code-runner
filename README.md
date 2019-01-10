@@ -1,9 +1,11 @@
 # 代码执行器
+## install
+`npm i -S jscode-runner`
 
 ## usage
 
 ```javascript
-const Runner = require('code-runner')
+const Runner = require('jscode-runner')
 let container = Runner.getContainer({
     count: 50 // 50个进程，自动调度
 })
