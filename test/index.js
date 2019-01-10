@@ -15,35 +15,25 @@ let p = new Promise((resolve, reject) => {
     }, 1500)
 })
 let result = await p
-// return {text:'其实我也不知道为什么'}
+return 'cloud function 1 run successfully'
 `,
             context: {
                 myData: i
             }
-        }).then(res1111 => {
-            console.log('res1111 result:', res1111)
-        }).catch(e => {
-            console.log('res1111 error:', e)
+        }).then(res => {
+            console.log(`expectd result is "cloud function 1 run successfully", while the actrual result is "${res.data}"`)
         })
+
         container.run({
-            code: `console.log(2)`,
-            context: {
-                myData: i
-            }
-        }).then(res2222 => {
-            console.log('res2222 result:', res2222)
+            code: `you are wrong`
         }).catch(e => {
-            console.log('res2222 error:', e)
+            console.log('预计输出"Unexpected identifier"错误，实际输出：', e)
         })
     }, (i + 1) * 1000)
 }
 
 container.run({
-    code: 'var i = 0;while(true){i++};return "you are dead process"'
-}).then(res3333 => {
-    console.log({
-        res3333
-    })
+    code: 'var i = 0;while(true){i++}'
 }).catch(e => {
-    console.log('res3333', e)
+    console.log('cloud function must fail with dead process', e)
 })
