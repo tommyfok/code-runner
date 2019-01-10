@@ -1,13 +1,13 @@
 const Runner = require('../index.js')
 
-let container = Runner.getContainer({
+let runner = Runner.get({
     count: 2
 })
 
 // run is an async function
 for (let i = 0; i < 15; i++) {
     setTimeout(() => {
-        container.run({
+        runner.run({
             code: `
 let p = new Promise((resolve, reject) => {
     setTimeout(()=>{
@@ -24,7 +24,7 @@ return 'cloud function 1 run successfully'
             console.log(`expectd result is "cloud function 1 run successfully", while the actrual result is "${res.data}"`)
         })
 
-        container.run({
+        runner.run({
             code: `you are wrong`
         }).catch(e => {
             console.log('预计输出"Unexpected identifier"错误，实际输出：', e)
@@ -32,7 +32,7 @@ return 'cloud function 1 run successfully'
     }, (i + 1) * 1000)
 }
 
-container.run({
+runner.run({
     code: 'var i = 0;while(true){i++}'
 }).catch(e => {
     console.log('cloud function must fail with dead process', e)

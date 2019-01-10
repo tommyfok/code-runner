@@ -3,5 +3,5 @@ const getContainer = require('./lib/cluster').getContainerCluster
 
 module.exports = {
     getKoaListeners,
-    getContainer
+    get: getContainer
 }

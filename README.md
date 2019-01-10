@@ -6,7 +6,7 @@
 
 ```javascript
 const Runner = require('jscode-runner')
-let container = Runner.getContainer({
+let container = Runner.get({
     count: 50 // 50个进程，自动调度
 })
 
