@@ -1,7 +1,7 @@
 {
   "name": "jscode-runner",
-  "version": "0.2.0",
-  "description": "WORK IN PROGRESS: run javascript code in several lines of code, each code runs in a process, auto load-balanced...",
+  "version": "0.2.1",
+  "description": "WIP: run javascript string safely in nodejs",
   "main": "index.js",
   "directories": {
     "lib": "lib",
