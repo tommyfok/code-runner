@@ -37,3 +37,7 @@ runner.run({
 }).catch(e => {
     console.log('cloud function must fail with dead process', e)
 })
+
+runner.run().catch(e => {
+    console.log('bad option, an error should be thrown:', e)
+})
