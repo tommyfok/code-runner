@@ -1,6 +1,6 @@
 {
   "name": "jscode-runner",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "WIP: run javascript string safely in nodejs",
   "main": "index.js",
   "directories": {
