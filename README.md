@@ -28,7 +28,7 @@ let customListeners = {
 
 // run is an async function
 container.run({
-    code: 'processSend({name: \'myEvent\',data: 123});return myData * 101', // 代码最外层能使用await
+    code: 'processSend(\'myEvent\',123);return myData * 101', // 代码最外层能使用await
     context: contextData,
     listeners: {
         ...koaListeners,

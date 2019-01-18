@@ -1,7 +1,7 @@
 const Runner = require('../index.js')
 
 let runner = Runner.get({
-    count: 2
+    count: 3
 })
 
 // run is an async function
@@ -40,4 +40,19 @@ runner.run({
 
 runner.run().catch(e => {
     console.log('bad option, an error should be thrown:', e)
+})
+
+runner.run({
+    code: 'processSend(\'myEvent\',123);return myData * 101', // 代码最外层能使用await
+    context: {
+        myData: 2
+    },
+    listeners: {
+        myEvent (e) {
+            console.log('ok, my event emitted,', e.data)
+        }
+    }
+})
+.then(res => {
+    console.log(res.data) // 202
 })
