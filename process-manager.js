@@ -1,5 +1,6 @@
 const uuid = require('uuid/v4')
 const hash = require('./common/hash')
+const ChildProcess = require('./child-process')
 
 class ProcessManager {
     constructor({

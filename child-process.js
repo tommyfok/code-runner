@@ -2,6 +2,7 @@ const child_process = require('child_process')
 const assert = require('assert')
 const hash = require('./common/hash')
 const fs = require('fs')
+const path = require('path')
 
 module.exports = class ChildProcess {
     constructor({
@@ -19,8 +20,8 @@ module.exports = class ChildProcess {
         this.free = true
         this.child_process = null
         this.scriptPath = scriptPath
-        this.onLog = onLog
-        this.onErr = onErr
+        this.onLog = onLog || (() => {})
+        this.onErr = onErr || (() => {})
         this.onCodeResult = onCodeResult
     }
     // 执行代码，其实是向子进程发送消息
@@ -40,10 +41,19 @@ module.exports = class ChildProcess {
                 let scriptContent = fs.readFileSync(this.scriptPath).toString().replace('DYNAMIC_CODE', code)
                 fs.writeFileSync(realFilePath, scriptContent)
             }
-            this.child_process = child_process.fork(realFilePath)
+            console.log({
+                realFilePath
+            })
+            this.child_process = child_process.fork(realFilePath, [], {
+                stdio: 'pipe'
+            })
             // 接收来自子进程的stdout/stderr/onCodeResult
-            this.child_process.stdout.on('data', this.onLog)
-            this.child_process.stderr.on('data', this.onErr)
+            this.child_process.stdout.on('data', buf => {
+                this.onLog(buf.toString())
+            })
+            this.child_process.stderr.on('data', buf => {
+                this.onErr(buf.toString())
+            })
             this.child_process.on('message', ({
                 name,
                 data
@@ -72,7 +82,7 @@ module.exports = class ChildProcess {
         }
         this.free = false
         if (!this.codeId) {
-            this.codeId = hash(code)
+            this.codeId = codeId
         }
         this.child_process.send({
             name: 'RUN_CODE',
@@ -87,17 +97,21 @@ module.exports = class ChildProcess {
     }
 
     reset() {
+        let realFileName = `${this.codeId}.js`
+        let realPathName = path.dirname(this.scriptPath)
+        let realFilePath = path.join(realPathName, realFileName)
         try {
-            fs.unlinkSync(`./${this.codeId}.js`)
+            fs.unlinkSync(realFilePath)
         } catch (e) {
-            console.log(`delete file failed: "./${this.codeId}.js"`)
+            console.log(`delete file failed: "${realFilePath}"`)
         }
-        this.codeId = null
+        this.codeId = undefined
         this.free = true
         if (this.child_process) {
+            console.log('process freed: ' + this.child_process.pid)
             this.child_process.kill('SIGINT')
         }
-        this.child_process = null
+        this.child_process = undefined
         this.ready = false
         this.cpuUsage = {}
         this.memoryUsage = {}

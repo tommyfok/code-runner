@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/tommyfok/code-runner/issues"
   },
-  "homepage": "https://github.com/tommyfok/code-runner#readme"
+  "homepage": "https://github.com/tommyfok/code-runner#readme",
+  "dependencies": {
+    "uuid": "^3.3.2"
+  }
 }
