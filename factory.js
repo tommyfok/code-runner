@@ -37,7 +37,7 @@ class CodeFactory {
                     if (this.afterRunCode && typeof this.afterRunCode === 'function') {
                         result = this.afterRunCode(result)
                     }
-                    callback[success ? 'resolve' : 'reject']({
+                    callback[(success && !err) ? 'resolve' : 'reject']({
                         userRequestId,
                         err,
                         success,
@@ -94,6 +94,7 @@ class CodeFactory {
                 delete this.callbacks[innerRequestId]
             }
         }
+        console.log(process.memoryUsage())
     }
 }
 

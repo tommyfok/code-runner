@@ -1,4 +1,3 @@
-const uuid = require('uuid/v4')
 const hash = require('./common/hash')
 const ChildProcess = require('./child-process')
 
@@ -26,13 +25,21 @@ class ProcessManager {
             let now = Date.now()
             this.processPool.forEach(cp => {
                 if ((now > cp.lastHeartBeatTime + 10 * 1000) || (now > cp.lastActiveTime + 60 * 1000)) {
-                    if (cp.codeId in this.codeProcessMap) {
-                        delete this.codeProcessMap[cp.codeId]
+                    let codeId = cp.codeId
+                    if (codeId && (codeId in this.codeProcessMap)) {
+                        delete this.codeProcessMap[codeId]
                     }
                     cp.reset()
                 }
             })
         }, 1000)
+        // 主进程死掉，需要下发清理子进程的命令
+        // 但似乎并不生效，为什么？
+        // process.on('beforeExit', () => {
+        //     this.processPool.forEach(cp => {
+        //         cp.reset()
+        //     })
+        // })
     }
 
     /* Container Manager */
@@ -47,13 +54,12 @@ class ProcessManager {
             })
             this.processPool.push(cp)
             return cp
-        } else {
-            throw '进程数超过maxProcessCount:' + this.maxProcessCount
         }
     }
 
     // 根据代码获取合适的子进程
-    getChildProcess (code) {
+    getChildProcess (params) {
+        let code = params.code
         let codeId = hash(code)
         if (codeId in this.codeProcessMap) {
             return this.codeProcessMap[codeId]
@@ -65,7 +71,13 @@ class ProcessManager {
                 this.codeProcessMap[codeId] = cp
                 return cp
             } else {
-                throw '没有空闲子进程'
+                console.log('没有空闲子进程')
+                this.onCodeResult({
+                    success: false,
+                    err: '没有空闲子进程',
+                    innerRequestId: params.innerRequestId,
+                    userRequestId: params.userRequestId
+                })
             }
         }
     }
@@ -78,7 +90,10 @@ class ProcessManager {
     //     }
     // `
     runCode(params) {
-        this.getChildProcess(params.code).runCode(params)
+        let cp = this.getChildProcess(params)
+        if (cp) {
+            cp.runCode(params)
+        }
     }
 }
 

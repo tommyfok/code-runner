@@ -34,16 +34,15 @@ module.exports = class ChildProcess {
         assert.ok(code, 'code required')
         let codeId = hash(code)
         if (!this.child_process) {
-            let realFileName = `${codeId}.js`
-            let realPathName = path.dirname(this.scriptPath)
-            let realFilePath = path.join(realPathName, realFileName)
+            let realDir = path.dirname(this.scriptPath)
+            let scriptName = path.basename(this.scriptPath)
+            let fileName = `${codeId}.${scriptName}`
+            let realFilePath = path.join(realDir, fileName)
             if (!fs.existsSync(realFilePath)) {
                 let scriptContent = fs.readFileSync(this.scriptPath).toString().replace('DYNAMIC_CODE', code)
                 fs.writeFileSync(realFilePath, scriptContent)
+                console.log('写入路径：', realFilePath)
             }
-            console.log({
-                realFilePath
-            })
             this.child_process = child_process.fork(realFilePath, [], {
                 stdio: 'pipe'
             })
@@ -97,11 +96,13 @@ module.exports = class ChildProcess {
     }
 
     reset() {
-        let realFileName = `${this.codeId}.js`
-        let realPathName = path.dirname(this.scriptPath)
-        let realFilePath = path.join(realPathName, realFileName)
+        let realDir = path.dirname(this.scriptPath)
+        let scriptName = path.basename(this.scriptPath)
+        let fileName = `${this.codeId}.${scriptName}`
+        let realFilePath = path.join(realDir, fileName)
         try {
             fs.unlinkSync(realFilePath)
+            console.log(`delete file success: "${realFilePath}"`)
         } catch (e) {
             console.log(`delete file failed: "${realFilePath}"`)
         }
