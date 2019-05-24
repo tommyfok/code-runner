@@ -51,7 +51,29 @@ module.exports = class ChildProcess {
             let realFilePath = path.join(realDir, fileName)
             if (!fs.existsSync(realFilePath)) {
                 let scriptContent = fs.readFileSync(this.scriptPath).toString().replace('DYNAMIC_CODE', code)
-                fs.writeFileSync(realFilePath, scriptContent)
+                fs.writeFileSync(realFilePath, `
+                    ${scriptContent};
+                    (function () {
+                        let cpu, mem, _hb
+                        _hb = function () {
+                            let isInit = !cpu
+                            cpu = process.cpuUsage(cpu)
+                            mem = process.memoryUsage(mem)
+                            process.send({
+                                name: 'HEARTBEAT',
+                                data: isInit ? {
+                                    pid: process.pid
+                                } : {
+                                    pid: process.pid,
+                                    cpuUsage: cpu,
+                                    memoryUsage: mem
+                                }
+                            })
+                            setTimeout(_hb, 1000);
+                        }
+                        _hb()
+                    })()
+                `)
                 console.log('写入路径：', realFilePath)
             }
             this.child_process = child_process.fork(realFilePath, [], {

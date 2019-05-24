@@ -1,4 +1,7 @@
-process.on('message', async ({name, data}) => {
+process.on('message', async ({
+    name,
+    data
+}) => {
     switch (name) {
         case 'RUN_CODE':
             let result
@@ -34,23 +37,3 @@ process.on('message', async ({name, data}) => {
             break
     }
 })
-
-let cpu, mem
-function _hb() {
-    let isInit = !cpu
-    cpu = process.cpuUsage(cpu)
-    mem = process.memoryUsage(mem)
-    process.send({
-        name: 'HEARTBEAT',
-        data: isInit ? {
-            pid: process.pid
-        } : {
-            pid: process.pid,
-            cpuUsage: cpu,
-            memoryUsage: mem
-        }
-    })
-    setTimeout(_hb, 1000);
-}
-
-_hb()
