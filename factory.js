@@ -15,7 +15,7 @@ class CodeFactory {
         beforeRunCode,
         afterRunCode
     }) {
-        this.maxTimeout = maxTimeout || (60 * 1000)
+        this.maxTimeout = (maxTimeout || 60) * 1000
         this.callbacks = {}
         this.codeId2ReqIdsMap = {}
         this.beforeRunCode = beforeRunCode
@@ -32,21 +32,25 @@ class CodeFactory {
                 success,
                 result
             }) => {
-                let callback = this._popCallback(innerRequestId)
-                if (callback) {
-                    if (this.afterRunCode && typeof this.afterRunCode === 'function') {
-                        result = this.afterRunCode(result)
+                process.nextTick(() => {
+                    let callback = this._popCallback(innerRequestId)
+                    if (callback) {
+                        if (this.afterRunCode && typeof this.afterRunCode === 'function') {
+                            result = this.afterRunCode(result)
+                        }
+                        callback[(success && !err) ? 'resolve' : 'reject']({
+                            userRequestId,
+                            err,
+                            success,
+                            result
+                        })
                     }
-                    callback[(success && !err) ? 'resolve' : 'reject']({
-                        userRequestId,
-                        err,
-                        success,
-                        result
-                    })
-                }
+                })
             }
         })
-        setInterval(this._cleanTimeoutCallbacks, 1000)
+        setInterval(() => {
+            this._cleanTimeoutCallbacks()
+        }, 1000)
     }
 
     runCode(params) {
@@ -67,7 +71,8 @@ class CodeFactory {
             data: p.data
         })
         let cbObj = {
-            timeout: Date.now() + p.timeout
+            timeout: Date.now() + p.timeout,
+            userRequestId
         }
         let promise = new Promise((resolve, reject) => {
             cbObj.resolve = resolve
@@ -90,11 +95,15 @@ class CodeFactory {
         for (let innerRequestId in this.callbacks) {
             let cbObj = this.callbacks[innerRequestId]
             if (now > cbObj.timeout) {
-                cbObj.reject('ERR_TIMEOUT')
+                cbObj.reject({
+                    innerRequestId,
+                    userRequestId: cbObj.userRequestId,
+                    err: new Error('REQUEST_TIMEOUT'),
+                    success: false
+                })
                 delete this.callbacks[innerRequestId]
             }
         }
-        console.log(process.memoryUsage())
     }
 }
 

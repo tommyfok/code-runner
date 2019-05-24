@@ -3,7 +3,7 @@ const CodeFactory = require('../index')
 
 let factory = new CodeFactory({
     scriptPath: path.join(__dirname, './demo.js'),
-    maxProcessCount: 5,
+    maxProcessCount: 2,
     onLog: console.log,
     onErr: console.error
 })
@@ -30,4 +30,19 @@ factory.runCode({
     console.log('第3个函数的结果：', result)
 }).catch(e => {
     console.log('第3个函数的错误', e)
+})
+
+factory.runCode({
+    code: `
+    let p = new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('ok')
+        }, 10 * 1000)
+    })
+    return await p
+    `
+}).then(result => {
+    console.log('第4个函数的结果：', result)
+}).catch(e => {
+    console.log('第4个函数的错误', e)
 })

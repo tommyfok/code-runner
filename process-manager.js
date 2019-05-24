@@ -23,18 +23,21 @@ class ProcessManager {
         // 定期重启无响应进程
         setInterval(() => {
             let now = Date.now()
-            this.processPool.forEach(cp => {
-                if ((now > cp.lastHeartBeatTime + 10 * 1000) || (now > cp.lastActiveTime + 60 * 1000)) {
+            this.processPool.filter(cp => !cp.free).forEach(cp => {
+                let tooBusy = now > cp.lastHeartBeatTime + 10 * 1000 // 10秒钟都没有心跳上报的，清理掉
+                let tooFree = now > cp.lastActiveTime + 60 * 1000 // 60秒都没人用的，清理掉
+                if (tooBusy || tooFree) {
                     let codeId = cp.codeId
                     if (codeId && (codeId in this.codeProcessMap)) {
                         delete this.codeProcessMap[codeId]
                     }
+                    console.log(`cp reset because of ${tooFree?'too free':'too busy'}`)
                     cp.reset()
                 }
             })
         }, 1000)
         // 主进程死掉，需要下发清理子进程的命令
-        // 但似乎并不生效，为什么？
+        // 但似乎并不生效，为什么
         // process.on('beforeExit', () => {
         //     this.processPool.forEach(cp => {
         //         cp.reset()
@@ -71,10 +74,10 @@ class ProcessManager {
                 this.codeProcessMap[codeId] = cp
                 return cp
             } else {
-                console.log('没有空闲子进程')
+                console.log('没有空闲子进程，执行this.onCodeResult', params)
                 this.onCodeResult({
                     success: false,
-                    err: '没有空闲子进程',
+                    err: new Error('没有空闲子进程'),
                     innerRequestId: params.innerRequestId,
                     userRequestId: params.userRequestId
                 })
