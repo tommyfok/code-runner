@@ -9,12 +9,14 @@ class ProcessManager {
         maxProcessCount,
         onLog,
         onErr,
+        onHealthStatus,
         onCodeResult
     }) {
         assert.ok(processCount > 0, 'processCount必须大于0')
         // 初始化实例
         this.onLog = onLog
         this.onErr = onErr
+        this.onHealthStatus = onHealthStatus
         this.onCodeResult = onCodeResult
         this.processCount = processCount
         this.maxProcessCount = maxProcessCount || (processCount * 2)
@@ -42,7 +44,8 @@ class ProcessManager {
                 scriptPath: this.scriptPath,
                 onCodeResult: this.onCodeResult,
                 onLog: this.onLog,
-                onErr: this.onErr
+                onErr: this.onErr,
+                onHealthStatus: this.onHealthStatus
             })
             this.processPool.push(cp)
             return cp

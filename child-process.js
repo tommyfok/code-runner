@@ -9,6 +9,7 @@ module.exports = class ChildProcess {
         scriptPath,
         onLog,
         onErr,
+        onHealthStatus,
         onCodeResult
     }) {
         assert.ok(scriptPath, 'child-process filePath required.')
@@ -23,6 +24,7 @@ module.exports = class ChildProcess {
         this.scriptPath = scriptPath
         this.onLog = onLog || (() => {})
         this.onErr = onErr || (() => {})
+        this.onHealthStatus = onHealthStatus || (() => {})
         this.onCodeResult = onCodeResult
     }
     // onReady
@@ -79,6 +81,7 @@ module.exports = class ChildProcess {
                         // 有心跳表明ready
                         this.ready = true
                         this._flushOnReadyEvents()
+                        this.onHealthStatus(data)
                         break
                     default:
                         this.onLog({

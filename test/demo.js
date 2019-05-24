@@ -35,12 +35,19 @@ process.on('message', async ({name, data}) => {
     }
 })
 
+let cpu, mem
 function _hb() {
+    let isInit = !cpu
+    cpu = process.cpuUsage(cpu)
+    mem = process.memoryUsage(mem)
     process.send({
         name: 'HEARTBEAT',
-        data: {
-            cpuUsage: {},
-            memoryUsage: {}
+        data: isInit ? {
+            pid: process.pid
+        } : {
+            pid: process.pid,
+            cpuUsage: cpu,
+            memoryUsage: mem
         }
     })
     setTimeout(_hb, 1000);

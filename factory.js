@@ -6,6 +6,7 @@ class CodeFactory {
     constructor({
         onLog,
         onErr,
+        onHealthStatus,
         // 注意了，scriptPath对应的脚本里面一定要有
         // 1. 发送"HEARTBEAT"和"RUN_CODE_RESULT"消息给父进程
         // 2. 处理来自父进程的name="RUN_CODE"的消息
@@ -29,6 +30,7 @@ class CodeFactory {
             maxProcessCount,
             onLog,
             onErr,
+            onHealthStatus,
             onCodeResult: ({
                 innerRequestId,
                 userRequestId,

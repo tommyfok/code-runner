@@ -6,7 +6,10 @@ let factory = new CodeFactory({
     processCount: 3,
     maxProcessCount: 3,
     onLog: console.log,
-    onErr: console.error
+    onErr: console.error,
+    onHealthStatus (data) {
+        console.log('健康数据：', data)
+    }
 })
 
 console.log('第1个函数开始执行', Date.now())
