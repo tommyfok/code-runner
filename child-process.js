@@ -14,6 +14,7 @@ module.exports = class ChildProcess {
         assert.ok(scriptPath, 'child-process filePath required.')
         this.lastActiveTime = Date.now()
         this.lastHeartBeatTime = Date.now()
+        this.onReadyEvents = []
         this.cpuUsage = {}
         this.memoryUsage = {}
         this.ready = false
@@ -23,6 +24,14 @@ module.exports = class ChildProcess {
         this.onLog = onLog || (() => {})
         this.onErr = onErr || (() => {})
         this.onCodeResult = onCodeResult
+    }
+    // onReady
+    onReady(callback) {
+        if (this.ready) {
+            callback()
+        } else {
+            this.onReadyEvents.push(callback)
+        }
     }
     // 执行代码，其实是向子进程发送消息
     runCode({
@@ -69,6 +78,7 @@ module.exports = class ChildProcess {
                         this.lastHeartBeatTime = Date.now()
                         // 有心跳表明ready
                         this.ready = true
+                        this._flushOnReadyEvents()
                         break
                     default:
                         this.onLog({
@@ -83,14 +93,16 @@ module.exports = class ChildProcess {
         if (!this.codeId) {
             this.codeId = codeId
         }
-        this.child_process.send({
-            name: 'RUN_CODE',
-            data: {
-                innerRequestId,
-                userRequestId,
-                code,
-                context: data
-            }
+        this.onReady(() => {
+            this.child_process.send({
+                name: 'RUN_CODE',
+                data: {
+                    innerRequestId,
+                    userRequestId,
+                    code,
+                    context: data
+                }
+            })
         })
         this.lastActiveTime = Date.now()
     }
@@ -116,5 +128,12 @@ module.exports = class ChildProcess {
         this.ready = false
         this.cpuUsage = {}
         this.memoryUsage = {}
+    }
+
+    _flushOnReadyEvents() {
+        let cb
+        while (cb = this.onReadyEvents.shift()) {
+            cb()
+        }
     }
 }

@@ -35,7 +35,7 @@ process.on('message', async ({name, data}) => {
     }
 })
 
-setInterval(() => {
+function _hb() {
     process.send({
         name: 'HEARTBEAT',
         data: {
@@ -43,4 +43,7 @@ setInterval(() => {
             memoryUsage: {}
         }
     })
-}, 1000)
+    setTimeout(_hb, 1000);
+}
+
+_hb()

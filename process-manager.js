@@ -1,48 +1,37 @@
+const assert = require('assert')
 const hash = require('./common/hash')
 const ChildProcess = require('./child-process')
 
 class ProcessManager {
     constructor({
         scriptPath,
+        processCount,
         maxProcessCount,
         onLog,
         onErr,
         onCodeResult
     }) {
+        assert.ok(processCount > 0, 'processCount必须大于0')
+        // 初始化实例
         this.onLog = onLog
         this.onErr = onErr
         this.onCodeResult = onCodeResult
-        this.maxProcessCount = maxProcessCount
+        this.processCount = processCount
+        this.maxProcessCount = maxProcessCount || (processCount * 2)
         this.scriptPath = scriptPath
         this.processPool = []
         this.codeProcessMap = {}
+
         // 创建一定数量的子进程
-        for (let i = 0; i < maxProcessCount; i++) {
+        for (let i = 0; i < processCount; i++) {
             this.createProcess()
         }
-        // 定期重启无响应进程
+
+        // 定期循环
         setInterval(() => {
-            let now = Date.now()
-            this.processPool.filter(cp => !cp.free).forEach(cp => {
-                let tooBusy = now > cp.lastHeartBeatTime + 10 * 1000 // 10秒钟都没有心跳上报的，清理掉
-                let tooFree = now > cp.lastActiveTime + 60 * 1000 // 60秒都没人用的，清理掉
-                if (tooBusy || tooFree) {
-                    let codeId = cp.codeId
-                    if (codeId && (codeId in this.codeProcessMap)) {
-                        delete this.codeProcessMap[codeId]
-                    }
-                    console.log(`cp reset because of ${tooFree?'too free':'too busy'}`)
-                    cp.reset()
-                }
-            })
+            // 重置无用进程
+            this._resetInvalidCp()
         }, 1000)
-        // 主进程死掉，需要下发清理子进程的命令
-        // 但似乎并不生效，为什么
-        // process.on('beforeExit', () => {
-        //     this.processPool.forEach(cp => {
-        //         cp.reset()
-        //     })
-        // })
     }
 
     /* Container Manager */
@@ -61,7 +50,7 @@ class ProcessManager {
     }
 
     // 根据代码获取合适的子进程
-    getChildProcess (params) {
+    getChildProcess(params) {
         let code = params.code
         let codeId = hash(code)
         if (codeId in this.codeProcessMap) {
@@ -74,19 +63,23 @@ class ProcessManager {
                 this.codeProcessMap[codeId] = cp
                 return cp
             } else {
-                console.log('没有空闲子进程，执行this.onCodeResult', params)
-                this.onCodeResult({
-                    success: false,
-                    err: new Error('没有空闲子进程'),
-                    innerRequestId: params.innerRequestId,
-                    userRequestId: params.userRequestId
-                })
+                let cp = this.createProcess()
+                if (cp) {
+                    return cp
+                } else {
+                    this.onCodeResult({
+                        success: false,
+                        err: new Error('没有空闲子进程'),
+                        innerRequestId: params.innerRequestId,
+                        userRequestId: params.userRequestId
+                    })
+                }
             }
         }
     }
 
     // 执行代码，例如：
-    // code = `
+    // params.code = `
     //     let knex = this.db('albumgroup')
     //     return {
     //         body: yield knex('user').where('id', 10)
@@ -97,6 +90,23 @@ class ProcessManager {
         if (cp) {
             cp.runCode(params)
         }
+    }
+
+    // 重置无效子进程
+    _resetInvalidCp() {
+        let now = Date.now()
+        this.processPool.filter(cp => !cp.free).forEach(cp => {
+            let tooBusy = now > cp.lastHeartBeatTime + 10 * 1000 // 10秒钟都没有心跳上报的，清理掉
+            let tooFree = now > cp.lastActiveTime + 60 * 1000 // 60秒都没人用的，清理掉
+            if (tooBusy || tooFree) {
+                let codeId = cp.codeId
+                if (codeId && (codeId in this.codeProcessMap)) {
+                    delete this.codeProcessMap[codeId]
+                }
+                console.log(`子进程${cp.child_process.pid}由于${tooFree?'长时间无请求':'过于繁忙'}而被重置`)
+                cp.reset()
+            }
+        })
     }
 }
 

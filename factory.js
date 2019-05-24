@@ -1,3 +1,4 @@
+const assert = require('assert')
 const uuid = require('uuid/v4')
 const ProcessManager = require('./process-manager')
 
@@ -10,18 +11,21 @@ class CodeFactory {
         // 2. 处理来自父进程的name="RUN_CODE"的消息
         // 3. DYNAMIC_CODE
         scriptPath,
+        processCount,
         maxProcessCount,
         maxTimeout,
         beforeRunCode,
         afterRunCode
     }) {
         this.maxTimeout = (maxTimeout || 60) * 1000
+        assert.ok(!isNaN(this.maxTimeout), 'maxTimeout must be a number')
         this.callbacks = {}
         this.codeId2ReqIdsMap = {}
         this.beforeRunCode = beforeRunCode
         this.afterRunCode = afterRunCode
         this.pm = new ProcessManager({
             scriptPath,
+            processCount,
             maxProcessCount,
             onLog,
             onErr,
@@ -60,8 +64,8 @@ class CodeFactory {
         } else {
             p = params
         }
-        p.timeout = Math.max(p.timeout, 0)
-        p.timeout = Math.min(p.timeout || (10 * 1000), this.maxTimeout)
+        p.timeout = isNaN(p.timeout) ? this.maxTimeout : p.timeout
+        p.timeout = Math.min(p.timeout, 2 * 60 * 1000) // 保护系统，超过两分钟不处理的promise全部丢掉
         let innerRequestId = uuid()
         let userRequestId = p.requestId || innerRequestId
         this.pm.runCode({
