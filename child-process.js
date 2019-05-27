@@ -52,13 +52,14 @@ module.exports = class ChildProcess {
             if (!fs.existsSync(realFilePath)) {
                 let scriptContent = fs.readFileSync(this.scriptPath).toString().replace('DYNAMIC_CODE', code)
                 fs.writeFileSync(realFilePath, `
-                    ${scriptContent};
+                    const v8 = require('v8');
                     (function () {
-                        let cpu, mem, _hb
+                        var cpu, mem, heap, _hb
                         _hb = function () {
-                            let isInit = !cpu
+                            var isInit = !cpu
                             cpu = process.cpuUsage(cpu)
                             mem = process.memoryUsage(mem)
+                            heap = v8.getHeapStatistics()
                             process.send({
                                 name: 'HEARTBEAT',
                                 data: isInit ? {
@@ -66,13 +67,15 @@ module.exports = class ChildProcess {
                                 } : {
                                     pid: process.pid,
                                     cpuUsage: cpu,
-                                    memoryUsage: mem
+                                    memoryUsage: mem,
+                                    heap
                                 }
                             })
                             setTimeout(_hb, 1000);
                         }
                         _hb()
-                    })()
+                    })();
+                    ${scriptContent}
                 `)
                 console.log('写入路径：', realFilePath)
             }
