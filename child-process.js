@@ -52,9 +52,8 @@ module.exports = class ChildProcess {
             if (!fs.existsSync(realFilePath)) {
                 let scriptContent = fs.readFileSync(this.scriptPath).toString().replace('DYNAMIC_CODE', code)
                 fs.writeFileSync(realFilePath, `
-                    const v8 = require('v8');
                     (function () {
-                        var cpu, mem, heap, _hb
+                        var cpu, mem, heap, _hb, v8 = require('v8')
                         _hb = function () {
                             var isInit = !cpu
                             cpu = process.cpuUsage(cpu)
@@ -71,7 +70,7 @@ module.exports = class ChildProcess {
                                     heap
                                 }
                             })
-                            setTimeout(_hb, 1000);
+                            setTimeout(_hb, 1000)
                         }
                         _hb()
                     })();
