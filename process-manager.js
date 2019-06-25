@@ -61,8 +61,11 @@ class ProcessManager {
         } else {
             let freeCps = this.processPool.filter(cp => cp.free)
             if (freeCps.length) {
+                let now = Date.now()
                 let cp = freeCps[0]
                 cp.free = false
+                cp.lastHeartBeatTime = now
+                cp.lastActiveTime = now
                 this.codeProcessMap[codeId] = cp
                 return cp
             } else {
