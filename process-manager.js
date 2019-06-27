@@ -7,6 +7,7 @@ class ProcessManager {
         scriptPath,
         processCount,
         maxProcessCount,
+        maxIdleTime,
         onLog,
         onErr,
         onHealthStatus,
@@ -20,6 +21,7 @@ class ProcessManager {
         this.onCodeResult = onCodeResult
         this.processCount = processCount
         this.maxProcessCount = maxProcessCount || (processCount * 2)
+        this.maxIdleTime = maxIdleTime || 300
         this.scriptPath = scriptPath
         this.processPool = []
         this.codeProcessMap = {}
@@ -103,7 +105,7 @@ class ProcessManager {
         let now = Date.now()
         this.processPool.filter(cp => !cp.free).forEach(cp => {
             let tooBusy = now > cp.lastHeartBeatTime + 10 * 1000 // 10秒钟都没有心跳上报的，清理掉
-            let tooFree = now > cp.lastActiveTime + 60 * 1000 // 60秒都没人用的，清理掉
+            let tooFree = now > cp.lastActiveTime + this.maxIdleTime * 1000 // maxIdleTime秒都没人用的，清理掉
             if (tooBusy || tooFree) {
                 let codeId = cp.codeId
                 if (codeId && (codeId in this.codeProcessMap)) {

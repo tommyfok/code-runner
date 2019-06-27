@@ -14,6 +14,7 @@ class CodeFactory {
         scriptPath,
         processCount,
         maxProcessCount,
+        maxIdleTime,
         maxTimeout,
         beforeRunCode,
         afterRunCode
@@ -28,6 +29,7 @@ class CodeFactory {
             scriptPath,
             processCount,
             maxProcessCount,
+            maxIdleTime,
             onLog,
             onErr,
             onHealthStatus,
