@@ -1,6 +1,6 @@
 {
   "name": "jscode-runner",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Run javascript string safely in nodejs",
   "main": "index.js",
   "directories": {

@@ -111,7 +111,11 @@ class ProcessManager {
                 if (codeId && (codeId in this.codeProcessMap)) {
                     delete this.codeProcessMap[codeId]
                 }
-                console.log(`子进程${cp.child_process.pid}由于${tooFree?'长时间无请求':'过于繁忙'}而被重置`)
+                if (cp.child_process) {
+                    console.log(`子进程${cp.child_process.pid}由于${tooFree?'长时间无请求':'过于繁忙'}而被重置`)
+                } else {
+                    console.log(`子进程不存在，实例被重置`)
+                }
                 cp.reset()
             }
         })
