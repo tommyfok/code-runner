@@ -1,6 +1,6 @@
 {
   "name": "jscode-runner",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Run javascript string safely in nodejs",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,9 @@
   "homepage": "https://github.com/tommyfok/code-runner#readme",
   "dependencies": {
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "should": "^13.2.3"
   }
 }

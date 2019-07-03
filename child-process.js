@@ -3,6 +3,8 @@ const assert = require('assert')
 const hash = require('./common/hash')
 const fs = require('fs')
 const path = require('path')
+const debug = require('debug')
+const _log = debug('child-process.js')
 
 module.exports = class ChildProcess {
     constructor({
@@ -76,7 +78,7 @@ module.exports = class ChildProcess {
                     })();
                     ${scriptContent}
                 `)
-                console.log('写入路径：', realFilePath)
+                _log('写入路径：', realFilePath)
             }
             this.child_process = child_process.fork(realFilePath, [], {
                 stdio: 'pipe'
@@ -141,14 +143,14 @@ module.exports = class ChildProcess {
         let realFilePath = path.join(realDir, fileName)
         try {
             fs.unlinkSync(realFilePath)
-            console.log(`delete file success: "${realFilePath}"`)
+            _log(`delete file success: "${realFilePath}"`)
         } catch (e) {
-            console.log(`delete file failed: "${realFilePath}"`)
+            _log(`delete file failed: "${realFilePath}"`)
         }
         this.codeId = undefined
         this.free = true
         if (this.child_process) {
-            console.log('process freed: ' + this.child_process.pid)
+            _log('process freed: ' + this.child_process.pid)
             this.child_process.kill('SIGINT')
         }
         this.child_process = undefined

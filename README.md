@@ -4,4 +4,7 @@
 `npm i jscode-runner`
 
 ## usage
-just see /test
+just see /demo
+
+## test
+`npm test`
