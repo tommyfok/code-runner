@@ -35,7 +35,7 @@ describe('创建工厂实例', function () {
   })
 
   it('执行超时代码', function (done) {
-    this.timeout(65 * 1000)
+    this.timeout(61 * 1000)
     let factory = new Factory({
       onLog: console.log,
       processCount: 1,
@@ -65,5 +65,18 @@ describe('创建工厂实例', function () {
     }).catch(() => {
       done()
     })
+  })
+
+  it('性能保证', async function () {
+    let factory = new Factory({
+      onLog: console.log,
+      processCount: 1,
+      maxProcessCount: 10,
+      scriptPath: path.join(__dirname, '../demo/demo.js')
+    })
+    let response = await factory.runCode({
+      code: 'return "456"'
+    })
+    assert.ok(response.result === '456')
   })
 })
